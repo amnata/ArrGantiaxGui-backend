@@ -15,4 +15,5 @@
 /home/aminatah/Documents/ok/projetTrans/transprojet/ArrGantiaxGui-backend/src/main/java/com/agriapp/repository/PlantRepository.java
 /home/aminatah/Documents/ok/projetTrans/transprojet/ArrGantiaxGui-backend/src/main/java/com/agriapp/repository/UserRepository.java
 /home/aminatah/Documents/ok/projetTrans/transprojet/ArrGantiaxGui-backend/src/main/java/com/agriapp/service/AuthService.java
+/home/aminatah/Documents/ok/projetTrans/transprojet/ArrGantiaxGui-backend/src/main/java/com/agriapp/service/GrowthService.java
 /home/aminatah/Documents/ok/projetTrans/transprojet/ArrGantiaxGui-backend/src/main/java/com/agriapp/service/PlantService.java
