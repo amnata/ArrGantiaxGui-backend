@@ -1,3 +1,4 @@
 target/
 **/dialogflow-credentials.json
 **/*credentials*.json
+src/main/resources/dialogflow-credentials.json
