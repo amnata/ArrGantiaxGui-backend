@@ -138,7 +138,6 @@ public class GrowthRecord {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
     public Plant getPlant() { return plant; }
     public void setPlant(Plant plant) { this.plant = plant; }
 
