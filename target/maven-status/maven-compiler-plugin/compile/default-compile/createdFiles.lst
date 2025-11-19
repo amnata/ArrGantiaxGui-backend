@@ -17,7 +17,6 @@ com/agriapp/config/CorsConfig.class
 com/agriapp/controller/DetectionController$MultipartInputStreamFileResource.class
 com/agriapp/dto/RegisterRequest.class
 com/agriapp/controller/DetectionController.class
-com/agriapp/service/DialogflowService.class
 com/agriapp/entity/ChatMessage.class
 com/agriapp/dto/ProblemReportRequest.class
 com/agriapp/repository/UserRepository.class

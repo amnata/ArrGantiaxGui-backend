@@ -99,18 +99,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-dialogflow</artifactId>
-            <version>4.1.3</version> <!-- vérifie la dernière version disponible -->
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.cloud</groupId>
-            <artifactId>google-cloud-dialogflow</artifactId>
-            <version>4.33.0</version>
-        </dependency>
-
+    
     </dependencies>
 
     <build>
