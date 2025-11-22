@@ -1,16 +1,3 @@
-// package com.agriapp.repository;
-
-// import com.agriapp.model.GrowthRecord;
-// import com.agriapp.model.Plant;
-// import org.springframework.data.jpa.repository.JpaRepository;
-
-// import java.util.List;
-
-// public interface GrowthRepository extends JpaRepository<GrowthRecord, Long> {
-//     List<GrowthRecord> findByPlant(Plant plant);
-// }
-
-
 package com.agriapp.repository;
 
 import com.agriapp.model.GrowthRecord;
@@ -36,7 +23,6 @@ public interface GrowthRepository extends JpaRepository<GrowthRecord, Long> {
      * Correspond aux besoins de séquence LSTM
      */
     List<GrowthRecord> findByPlantOrderByDateAsc(Plant plant);
-
     /**
      * Trouver les enregistrements par type de culture
      * Pour l'analyse par type de plante
@@ -192,4 +178,65 @@ public interface GrowthRepository extends JpaRepository<GrowthRecord, Long> {
     }
 
     List<GrowthRecord> findByPlantId(Long plantId);
+
+    /**
+     * Trouver toutes les mesures d'un utilisateur
+     */
+    List<GrowthRecord> findByUserId(Long userId);
+    
+    /**
+     * Trouver les mesures d'un utilisateur ordonnées par date
+     */
+    List<GrowthRecord> findByUserIdOrderByDateDesc(Long userId);
 }
+
+
+// package com.agriapp.repository;
+
+// import com.agriapp.model.GrowthRecord;
+// import com.agriapp.model.Plant;
+// import org.springframework.data.domain.Pageable;
+// import org.springframework.data.jpa.repository.JpaRepository;
+// import org.springframework.data.jpa.repository.Query;
+// import org.springframework.data.repository.query.Param;
+// import org.springframework.stereotype.Repository;
+
+// import java.time.LocalDate;
+// import java.util.List;
+// import java.util.Optional;
+
+// @Repository
+// public interface GrowthRepository extends JpaRepository<GrowthRecord, Long> {
+
+//     List<GrowthRecord> findByPlantOrderByDateAsc(Plant plant);
+//     List<GrowthRecord> findByPlant_CropTypeOrderByDateAsc(String cropType);
+//     Optional<GrowthRecord> findTopByPlantIdOrderByDateDesc(Long plantId);
+//     List<GrowthRecord> findByPlantAndDateBetweenOrderByDateAsc(Plant plant, LocalDate startDate, LocalDate endDate);
+
+//     // Séquence avec Pageable pour LSTM
+//     List<GrowthRecord> findByPlantIdOrderByDateDesc(Long plantId, Pageable pageable);
+
+//     @Query("SELECT g FROM GrowthRecord g WHERE g.plant.id = :plantId " +
+//             "AND g.chlorophyllContent IS NOT NULL " +
+//             "AND g.ambientTemperature IS NOT NULL " +
+//             "AND g.soilTemperature IS NOT NULL " +
+//             "AND g.humidity IS NOT NULL " +
+//             "AND g.lightIntensity IS NOT NULL " +
+//             "AND g.electrochemicalSignal IS NOT NULL " +
+//             "ORDER BY g.date ASC")
+//     List<GrowthRecord> findCompleteSensorDataByPlantId(@Param("plantId") Long plantId);
+
+//     @Query("SELECT AVG(g.height) FROM GrowthRecord g WHERE g.plant.id = :plantId")
+//     Optional<Double> findAverageHeightByPlantId(@Param("plantId") Long plantId);
+
+//     @Query("SELECT MAX(g.height) FROM GrowthRecord g WHERE g.plant.id = :plantId")
+//     Optional<Double> findMaxHeightByPlantId(@Param("plantId") Long plantId);
+
+//     @Query("SELECT (MAX(g.height) - MIN(g.height)) / COUNT(DISTINCT g.date) FROM GrowthRecord g WHERE g.plant.id = :plantId")
+//     Optional<Double> findAverageGrowthRateByPlantId(@Param("plantId") Long plantId);
+
+//     @Query("SELECT AVG(g.chlorophyllContent), AVG(g.ambientTemperature), AVG(g.humidity) FROM GrowthRecord g WHERE g.plant.id = :plantId")
+//     Optional<Object[]> findAverageHealthMetricsByPlantId(@Param("plantId") Long plantId);
+
+//     List<GrowthRecord> findByPlantId(Long plantId);
+// }

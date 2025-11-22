@@ -1,41 +1,3 @@
-// package com.agriapp.controller;
-
-// import com.agriapp.model.GrowthRecord;
-// import com.agriapp.model.Plant;
-// import com.agriapp.repository.GrowthRepository;
-// import com.agriapp.repository.PlantRepository;
-// import org.springframework.web.bind.annotation.*;
-
-// import java.time.LocalDate;
-// import java.util.List;
-
-// @RestController
-// @RequestMapping("/growth")
-// public class GrowthController {
-
-//     private final GrowthRepository growthRepository;
-//     private final PlantRepository plantRepository;
-
-//     public GrowthController(GrowthRepository growthRepository, PlantRepository plantRepository) {
-//         this.growthRepository = growthRepository;
-//         this.plantRepository = plantRepository;
-//     }
-
-//     @GetMapping("/{plantId}")
-//     public List<GrowthRecord> getGrowthByPlant(@PathVariable Long plantId) {
-//         Plant plant = plantRepository.findById(plantId)
-//                 .orElseThrow(() -> new RuntimeException("Plante non trouvée"));
-//         return growthRepository.findByPlant(plant);
-//     }
-
-//     @PostMapping
-//     public GrowthRecord addGrowth(@RequestBody GrowthRecord record) {
-//         record.setDate(LocalDate.now());
-//         return growthRepository.save(record);
-//     }
-// }
-
-
 package com.agriapp.controller;
 
 import com.agriapp.model.GrowthRecord;
@@ -45,6 +7,10 @@ import com.agriapp.repository.PlantRepository;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import java.security.Principal;
+import com.agriapp.model.User;
+import com.agriapp.repository.UserRepository;
+
 
 import java.time.LocalDate;
 import java.util.*;
@@ -60,11 +26,24 @@ public class GrowthController {
 
     private final String FLASK_BASE_URL = "http://localhost:5000";
 
-    public GrowthController(GrowthRepository growthRepository, PlantRepository plantRepository) {
+    private final UserRepository userRepository;
+
+    private Long getUserIdFromPrincipal(Principal principal) {
+    User user = userRepository.findByEmail(principal.getName())
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+    return user.getId();
+}
+
+
+    public GrowthController(GrowthRepository growthRepository,
+                            PlantRepository plantRepository,
+                            UserRepository userRepository) {
         this.growthRepository = growthRepository;
         this.plantRepository = plantRepository;
+        this.userRepository = userRepository;
         this.restTemplate = new RestTemplate();
     }
+
 
     // =============================================
     // ENDPOINTS CORRESPONDANT À FLASK
@@ -173,7 +152,7 @@ public class GrowthController {
      * Endpoint combiné : Crée un enregistrement + prédiction
      */
     @PostMapping("/record-with-prediction")
-    public ResponseEntity<?> createRecordWithPrediction(@RequestBody GrowthRecord record) {
+    public ResponseEntity<?> createRecordWithPrediction(@RequestBody GrowthRecord record, Principal principal) {
         try {
             // 1. Sauvegarder l'enregistrement
             Plant plant = plantRepository.findById(record.getPlant().getId())
@@ -181,6 +160,10 @@ public class GrowthController {
 
             record.setPlant(plant);
             record.setDate(LocalDate.now());
+
+            Long userId = getUserIdFromPrincipal(principal);
+            record.setUserId(userId);
+
             GrowthRecord savedRecord = growthRepository.save(record);
 
             // 2. Récupérer l'historique pour la prédiction
@@ -239,16 +222,85 @@ public class GrowthController {
      * Récupérer tous les enregistrements d'une plante
      */
     @GetMapping("/plant/{plantId}")
-    public ResponseEntity<List<GrowthRecord>> getGrowthByPlant(@PathVariable Long plantId) {
+    public ResponseEntity<List<GrowthRecord>> getGrowthByPlant(@PathVariable Long plantId, Principal principal) {
         try {
             Plant plant = plantRepository.findById(plantId)
                     .orElseThrow(() -> new RuntimeException("Plante non trouvée"));
-            List<GrowthRecord> records = growthRepository.findByPlantOrderByDateAsc(plant);
-            return ResponseEntity.ok(records);
+           
+            Long userId = getUserIdFromPrincipal(principal);
+            
+             List<GrowthRecord> records = growthRepository.findByPlantOrderByDateAsc(plant)
+                .stream()
+                .filter(r -> r.getUserId().equals(userId)) // filtrer par utilisateur
+                .toList();            return ResponseEntity.ok(records);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
+
+    /**
+ * Récupérer TOUTES les mesures de l'utilisateur connecté
+ */
+@GetMapping("/all")
+public ResponseEntity<List<GrowthRecord>> getAllUserGrowthRecords(Principal principal) {
+    try {
+        System.out.println("🔍 Récupération de toutes les mesures pour l'utilisateur");
+        
+        Long userId = getUserIdFromPrincipal(principal);
+        System.out.println("User ID: " + userId);
+        
+        // Récupérer TOUTES les mesures de cet utilisateur
+        List<GrowthRecord> allRecords = growthRepository.findByUserId(userId);
+        
+        System.out.println("✅ Nombre de mesures trouvées: " + allRecords.size());
+        
+        return ResponseEntity.ok(allRecords);
+        
+    } catch (Exception e) {
+        System.err.println("❌ Erreur récupération mesures: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
+
+/**
+ * Supprimer un enregistrement de croissance
+ */
+@DeleteMapping("/records/{id}")
+public ResponseEntity<?> deleteGrowthRecord(@PathVariable Long id, Principal principal) {
+    try {
+        System.out.println("🗑️ Tentative de suppression du record ID: " + id);
+        
+        // Vérifier que l'enregistrement existe
+        GrowthRecord record = growthRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Enregistrement non trouvé"));
+        
+        // Vérifier que l'utilisateur est propriétaire
+        Long userId = getUserIdFromPrincipal(principal);
+        
+        if (!record.getUserId().equals(userId)) {
+            System.err.println("❌ Utilisateur " + userId + " non autorisé à supprimer le record de l'utilisateur " + record.getUserId());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "Vous n'êtes pas autorisé à supprimer cet enregistrement"));
+        }
+        
+        // Supprimer
+        growthRepository.deleteById(id);
+        
+        System.out.println("✅ Record " + id + " supprimé avec succès");
+        
+        return ResponseEntity.ok(Map.of(
+            "message", "Enregistrement supprimé avec succès",
+            "deletedId", id
+        ));
+        
+    } catch (Exception e) {
+        System.err.println("❌ Erreur suppression: " + e.getMessage());
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Erreur lors de la suppression: " + e.getMessage()));
+    }
+}
 
     // =============================================
     // METHODES UTILITAIRES CORRIGÉES

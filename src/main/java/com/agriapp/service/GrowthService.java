@@ -110,3 +110,94 @@ public class GrowthService {
         return anomalies;
     }
 }
+
+
+// package com.agriapp.service;
+
+// import com.agriapp.model.GrowthRecord;
+// import com.agriapp.repository.GrowthRepository;
+// import org.springframework.data.domain.PageRequest;
+// import org.springframework.stereotype.Service;
+
+// import java.time.LocalDate;
+// import java.util.*;
+// import java.util.stream.Collectors;
+
+// @Service
+// public class GrowthService {
+
+//     private final GrowthRepository growthRepository;
+
+//     public GrowthService(GrowthRepository growthRepository) {
+//         this.growthRepository = growthRepository;
+//     }
+
+//     public List<Map<String, Object>> prepareLSTMSequence(Long plantId, int sequenceLength) {
+//         List<GrowthRecord> records = growthRepository.findByPlantIdOrderByDateDesc(plantId, PageRequest.of(0, sequenceLength));
+//         Collections.reverse(records); // Pour avoir la séquence croissante
+//         return records.stream().map(r -> {
+//             Map<String, Object> data = new HashMap<>();
+//             data.put("chlorophyll_content", r.getChlorophyllContent() != null ? r.getChlorophyllContent() : 35.0);
+//             data.put("ambient_temperature", r.getAmbientTemperature() != null ? r.getAmbientTemperature() : 25.0);
+//             data.put("soil_temperature", r.getSoilTemperature() != null ? r.getSoilTemperature() : 23.0);
+//             data.put("humidity", r.getHumidity() != null ? r.getHumidity() : 60.0);
+//             data.put("light_intensity", r.getLightIntensity() != null ? r.getLightIntensity() : 1200.0);
+//             data.put("electrochemical_signal", r.getElectrochemicalSignal() != null ? r.getElectrochemicalSignal() : 0.5);
+//             return data;
+//         }).collect(Collectors.toList());
+//     }
+
+//     public Map<String, Object> calculateGrowthStats(Long plantId) {
+//         Map<String, Object> stats = new HashMap<>();
+//         Double avgHeight = growthRepository.findAverageHeightByPlantId(plantId).orElse(0.0);
+//         Double maxHeight = growthRepository.findMaxHeightByPlantId(plantId).orElse(0.0);
+//         Double growthRate = growthRepository.findAverageGrowthRateByPlantId(plantId).orElse(0.0);
+
+//         stats.put("average_height", Math.round(avgHeight * 100.0) / 100.0);
+//         stats.put("max_height", maxHeight);
+//         stats.put("average_growth_rate", Math.round(growthRate * 100.0) / 100.0);
+
+//         List<GrowthRecord> records = growthRepository.findByPlantId(plantId);
+//         if (!records.isEmpty()) {
+//             LocalDate firstDate = records.get(0).getDate();
+//             LocalDate lastDate = records.get(records.size() - 1).getDate();
+//             long days = java.time.temporal.ChronoUnit.DAYS.between(firstDate, lastDate);
+//             stats.put("measurement_period_days", days);
+//             stats.put("total_measurements", records.size());
+//             stats.put("measurement_frequency", days > 0 ? Math.round(records.size() / (double) days * 100.0) / 100.0 : 0);
+//         }
+
+//         return stats;
+//     }
+
+//     public List<Map<String, Object>> detectGrowthAnomalies(Long plantId) {
+//         List<Map<String, Object>> anomalies = new ArrayList<>();
+//         List<GrowthRecord> records = growthRepository.findByPlantId(plantId);
+//         if (records.size() < 2) return anomalies;
+
+//         for (int i = 1; i < records.size(); i++) {
+//             GrowthRecord cur = records.get(i);
+//             GrowthRecord prev = records.get(i - 1);
+//             double change = cur.getHeight() - prev.getHeight();
+//             if (change < -prev.getHeight() * 0.2) {
+//                 anomalies.add(Map.of(
+//                         "date", cur.getDate(),
+//                         "type", "HAUTEUR_BAISSE",
+//                         "severity", "HIGH",
+//                         "current_height", cur.getHeight(),
+//                         "previous_height", prev.getHeight(),
+//                         "change", change
+//                 ));
+//             }
+//             if (cur.getChlorophyllContent() != null && cur.getChlorophyllContent() < 25) {
+//                 anomalies.add(Map.of(
+//                         "date", cur.getDate(),
+//                         "type", "CHLOROPHYLLE_BASSE",
+//                         "severity", "MEDIUM",
+//                         "value", cur.getChlorophyllContent()
+//                 ));
+//             }
+//         }
+//         return anomalies;
+//     }
+// }

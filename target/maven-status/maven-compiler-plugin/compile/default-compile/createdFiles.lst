@@ -1,9 +1,11 @@
 com/agriapp/entity/ProblemReport$ProblemReportBuilder.class
 com/agriapp/controller/ChatController.class
+com/agriapp/config/SecurityConfig.class
 com/agriapp/repository/ProblemReportRepository.class
 com/agriapp/config/RestTemplateConfig.class
 com/agriapp/service/ChatService$IntentMatch.class
 com/agriapp/config/CorsConfig$1.class
+com/agriapp/controller/UserController.class
 com/agriapp/model/User.class
 com/agriapp/dto/ChatMessageResponse.class
 com/agriapp/dto/ResetPasswordRequest.class
@@ -19,6 +21,7 @@ com/agriapp/dto/RegisterRequest.class
 com/agriapp/controller/DetectionController.class
 com/agriapp/entity/ChatMessage.class
 com/agriapp/dto/ProblemReportRequest.class
+com/agriapp/security/CustomUserDetailsService.class
 com/agriapp/repository/UserRepository.class
 com/agriapp/AgriAppApplication.class
 com/agriapp/controller/PlantController.class
@@ -28,10 +31,13 @@ com/agriapp/dto/ChatMessageResponse$ChatMessageResponseBuilder.class
 com/agriapp/dto/LoginRequest.class
 com/agriapp/controller/AuthController.class
 com/agriapp/entity/ChatMessage$ChatMessageBuilder.class
+com/agriapp/security/CustomUserDetails.class
+com/agriapp/security/JwtUtil.class
 com/agriapp/service/GrowthService.class
 com/agriapp/repository/GrowthRepository.class
 com/agriapp/controller/GrowthController.class
 com/agriapp/service/ChatService$IntentData.class
 com/agriapp/repository/PlantRepository.class
+com/agriapp/security/JwtAuthenticationFilter.class
 com/agriapp/repository/ChatMessageRepository.class
 com/agriapp/service/AuthService.class
